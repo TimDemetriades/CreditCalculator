@@ -1,0 +1,2 @@
+# CreditCalculator
+Simple Credit Calculator
