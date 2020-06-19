@@ -1,40 +1,71 @@
-def count_of_months(monthly_payment, principal):
-    if (principal / monthly_payment).is_integer():
-        return int(principal / monthly_payment)
+# Credit Calculator
+# By: Tim Demetriades
+# Date: 6/19/2020
+
+import math
+
+def month_to_year_converter(months):
+    years = int(months / 12)
+    months = months % 12
+    return (years, months)
+
+def number_checker(string):
+    while True:
+        try:
+            string
+        except ValueError:
+            print('Please enter a number')
+        else:
+            break
+
+def count_of_months(principal, monthly_payment, interest):
+    nominal_interest = interest / (12 * 100)     # 12 months, 100%
+    x = monthly_payment / (monthly_payment - nominal_interest * principal)
+    if math.log(x, 1 + interest).is_integer():
+        return math.log(x, 1 + interest)
     else:
-        return int(principal // monthly_payment + 1)
-def monthly_payment(months, principal):
-    if (principal / months).is_integer():
-        return int(principal / months)
-    else:
-        payment = int(principal // months + 1)
-        return (payment, principal - (months - 1) * payment)    # return list/tuple
+        return math.ceil(math.log(x, 1 + nominal_interest))
+        
+def monthly_payment(principal, months, interest):
+    nominal_interest = interest / (12 * 100)     # 12 months, 100%
+    return principal * ((nominal_interest * pow(1 + nominal_interest, months)) / (pow(1 + nominal_interest, months) - 1))
+
+def principal(monthly_payment, months, interest):
+    nominal_interest = interest / (12 * 100)     # 12 months, 100%
+    return monthly_payment / ((nominal_interest * pow(1 + nominal_interest, months)) / (pow(1 + nominal_interest, months) - 1))
 
 while True:
-    try:
-        principal = int(input('Enter the credit principal: '))
-    except ValueError:
-        print('Please enter a number')
-    else:
-        print(principal)
-        break
-while True:
-    option = input('What do you want to calculate?\nType "m" - for count of months,\nType "p" - for monthly payment\n')
-    if option == 'm':
-        monthly_payment = int(input('Enter monthly payment: '))
-        months = count_of_months(monthly_payment, principal)
-        if months != 1:
-            print(f'\nIt takes {months} months to repay the credit\n')
+    option = input('What do you want to calculate?\ntype "n" - for count of months,\ntype "a" - for annunity monthly payment\ntype "p" - for credit principal:\n')
+    if option == 'n':       # Calculate count of years/months to pay off credit
+        principal = float(input('Enter credit principal:\n'))
+        monthly_payment = float(input('Enter monthly payment:\n'))
+        interest = float(input('Enter credit interest:\n'))
+        months = count_of_months(principal, monthly_payment, interest)
+
+        time = month_to_year_converter(months)
+        if time[0] == 0:
+            if months != 1:
+                print(f'\nYou need {months} months to repay this credit!\n')
+            else:
+                print(f'\nYou need 1 month to repay this credit!\n')
         else:
-            print(f'\nIt takes 1 month to repay the credit\n')
+            print(f'You need {time[0]} years and {time[1]} months to repay this credit!')
         break
-    elif option == 'p':
-        months = int(input('Enter count of months: '))
-        monthly_payment = monthly_payment(months, principal)
-        if isinstance(monthly_payment, int):        # check if integer or list/tuple was returned
-            print(f'\nYour monthly payment = {monthly_payment}\n')
-        else:
-            print(f'\nYour monthly payment = {monthly_payment[0]} with last month payment = {monthly_payment[1]}\n')
+    elif option == 'a':     # Calculate monthly/annuinty payment
+        principal = float(input('Enter credit principal:\n'))
+        months = float(input('Enter count of periods:\n'))
+        interest = float(input('Enter credit interest:\n'))
+
+        monthly_payment = math.ceil(monthly_payment(principal, months, interest))
+        print(f'Your annuity payment = {monthly_payment}!')
+        break
+    elif option == 'p':     # Calculate credit principal
+        number_checker(monthly_payment = float(input('Enter monthly payment:\n')))
+        months = float(input('Enter count of periods:\n'))
+        interest = float(input('Enter credit interest:\n'))
+
+        principal = math.floor(principal(monthly_payment, months, interest))
+        print(f'Your credit principal = {principal}!')
         break
     else:
         print('Please enter either "m" or "p"')
